@@ -12,6 +12,8 @@ SDL_Surface* winSurface = nullptr;
 SDL_Window* window = nullptr;
 Chip8 ch8;
 
+uint color = 0;
+
 int main(int argc, char const *argv[])
 {
   if(argc < 2)
@@ -23,12 +25,13 @@ int main(int argc, char const *argv[])
 
   if ( !init() ) return 1;
 
-  ch8.step();
-
   while ( loop() ) {
     ch8.step();
-		// wait before processing the next frame
-		SDL_Delay(10);
+
+    //getchar();
+
+	// wait before processing the next frame
+	SDL_Delay(10);
 	}
 
 	kill();
@@ -51,14 +54,13 @@ bool loop() {
             return 0;
           break;
         }
-				break;
 			case SDL_KEYUP:
 				break;
 		}
 	}
 
   // Fill the window with a white rectangle
-  SDL_FillRect( winSurface, NULL, SDL_MapRGB( winSurface->format, 0, 0, 0 ) );
+  SDL_FillRect( winSurface, NULL, SDL_MapRGB( winSurface->format, 0, 0, 0) );
 
   // Update the window display
   SDL_UpdateWindowSurface( window );

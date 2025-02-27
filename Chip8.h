@@ -3,6 +3,7 @@
 #include <stack>
 
 #define DISPLAY_SCALE 10 //display scale factor
+#define PROGRAM_BASE_ADDRESS 512
 
 class Chip8 {
 private:

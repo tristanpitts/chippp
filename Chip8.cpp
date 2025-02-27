@@ -5,7 +5,7 @@
 
 Chip8::Chip8()
 {
-  PC = 512;
+  PC = PROGRAM_BASE_ADDRESS;
   I = 0;
   SP = 0;
   memset(Registers, 0, 16);
@@ -24,9 +24,9 @@ int Chip8::init(std::string filePath)
   if (rom.is_open())
   {
     std::string fileContent((std::istreambuf_iterator<char>(rom)), std::istreambuf_iterator<char>());
-    std::memcpy(&Memory[512], &fileContent[0], fileContent.size());
+    std::memcpy(&Memory[PROGRAM_BASE_ADDRESS], &fileContent[0], fileContent.size());
     rom.close();
-    if(memcmp(&fileContent[0], &Memory[512], fileContent.size()) != 0)
+    if(memcmp(&fileContent[0], &Memory[PROGRAM_BASE_ADDRESS], fileContent.size()) != 0)
     {
       std::cout<<"Error loading rom"<<std::endl;
       return 1;
@@ -38,6 +38,100 @@ int Chip8::init(std::string filePath)
 
 void Chip8::step()
 {
-  printf("%X%X ", Memory[PC+1], Memory[PC]);
+  //printf("%X%X\n", Memory[PC],Memory[PC+1]) ;
+
+  uint8_t instruction[4] =
+  {
+    (Memory[PC+1] & 0x0F),
+    (Memory[PC+1] & 0xF0) >> 4,
+    (Memory[PC] & 0x0F),
+    (Memory[PC] & 0xF0) >> 4
+  };
+
+  printf("%X%X%X%X, ", instruction[3], instruction[2], instruction[1], instruction[0]);
+
+  switch(instruction[3])
+  {
+    case 0x0:
+    {
+        switch(instruction[1] << 4 | instruction[0])
+        {
+            case 0xE0:
+            {
+                std::cout<<"Clear Screen"<<std::endl;
+                break;
+            }
+            case 0xEE:
+            {
+                std::cout<<"Return from subroutine"<<std::endl;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    }
+
+    case 0x1:
+    {
+        PC = instruction[2] << 8 | instruction[1] << 4 | instruction[0];
+        std::cout<<"Set PC to " << std::hex << PC <<std::endl;
+        break;
+    }
+
+    case 0x2:
+    {
+        uint16_t addr = instruction[2] << 8 | instruction[1] << 4 | instruction[0];
+        std::cout << "Jump to " << std::hex << addr << std::endl;
+        break;
+    }
+
+    case 0x3:
+    {
+        uint8_t value = instruction[1] << 4 | instruction[0];
+        printf("Skip next instruction if register %X == %X\n", instruction[2], value);
+        break;
+    }
+
+    case 0x4:
+    {
+        uint8_t value = instruction[1] << 4 | instruction[0];
+        printf("Skip next instruction if register %X != %X\n", instruction[2], value);
+        break;
+    }
+
+    case 0x5:
+    {
+        printf("Skip next instruction if register %X != register %X\n", instruction[2], instruction[1]);
+        break;
+    }
+
+    case 0x6:
+    {
+        uint8_t value = instruction[1] << 4 | instruction[0];
+        printf("Set register %X to %X\n", instruction[2], value);
+        break;
+    }
+
+    case 0x7:
+    {
+        uint8_t value = instruction[1] << 4 | instruction[0];
+        printf("Set register %X = register %X + %X\n", instruction[2], instruction[2], value);
+        break;
+    }
+
+    case 0x8:
+    {
+        printf("register operation, todo\n");
+        break;
+    }
+
+    default:
+    {
+        printf("Unimplemented or unknown\n");
+    }
+  }
+
   PC+=2;
 }
