@@ -76,14 +76,14 @@ void Chip8::step()
     case 0x1:
     {
         PC = instruction[2] << 8 | instruction[1] << 4 | instruction[0];
-        std::cout<<"Set PC to " << std::hex << PC <<std::endl;
+        std::cout<<"Jump to " << std::hex << PC <<std::endl;
         break;
     }
 
     case 0x2:
     {
         uint16_t addr = instruction[2] << 8 | instruction[1] << 4 | instruction[0];
-        std::cout << "Jump to " << std::hex << addr << std::endl;
+        std::cout << "Call Subroutine at " << std::hex << addr << std::endl;
         break;
     }
 
@@ -91,6 +91,14 @@ void Chip8::step()
     {
         uint8_t value = instruction[1] << 4 | instruction[0];
         printf("Skip next instruction if register %X == %X\n", instruction[2], value);
+        if(Registers[instruction[2]] == value)
+        {
+          PC+=4;
+        }
+        else
+        {
+          PC+=2;
+        }
         break;
     }
 
@@ -98,12 +106,28 @@ void Chip8::step()
     {
         uint8_t value = instruction[1] << 4 | instruction[0];
         printf("Skip next instruction if register %X != %X\n", instruction[2], value);
+        if(Registers[instruction[2]] != value)
+        {
+          PC+=4;
+        }
+        else
+        {
+          PC+=2;
+        }
         break;
     }
 
     case 0x5:
     {
         printf("Skip next instruction if register %X != register %X\n", instruction[2], instruction[1]);
+        if(Registers[instruction[2]] != Registers[instruction[1]])
+        {
+          PC+=4;
+        }
+        else
+        {
+          PC+=2;
+        }
         break;
     }
 
@@ -111,6 +135,8 @@ void Chip8::step()
     {
         uint8_t value = instruction[1] << 4 | instruction[0];
         printf("Set register %X to %X\n", instruction[2], value);
+        Registers[instruction[2]] = value;
+        PC+=2;
         break;
     }
 
@@ -118,12 +144,14 @@ void Chip8::step()
     {
         uint8_t value = instruction[1] << 4 | instruction[0];
         printf("Set register %X = register %X + %X\n", instruction[2], instruction[2], value);
+        Registers[instruction[2]]+=value;
+        PC+=2;
         break;
     }
 
     case 0x8:
     {
-        printf("register operation, todo\n");
+        printf("register operations, todo\n");
         break;
     }
 
