@@ -71,6 +71,7 @@ void Chip8::step()
                 break;
             }
         }
+        break;
     }
 
     case 0x1:
@@ -93,10 +94,6 @@ void Chip8::step()
         printf("Skip next instruction if register %X == %X\n", instruction[2], value);
         if(Registers[instruction[2]] == value)
         {
-          PC+=4;
-        }
-        else
-        {
           PC+=2;
         }
         break;
@@ -108,10 +105,6 @@ void Chip8::step()
         printf("Skip next instruction if register %X != %X\n", instruction[2], value);
         if(Registers[instruction[2]] != value)
         {
-          PC+=4;
-        }
-        else
-        {
           PC+=2;
         }
         break;
@@ -121,10 +114,6 @@ void Chip8::step()
     {
         printf("Skip next instruction if register %X != register %X\n", instruction[2], instruction[1]);
         if(Registers[instruction[2]] != Registers[instruction[1]])
-        {
-          PC+=4;
-        }
-        else
         {
           PC+=2;
         }
@@ -136,7 +125,6 @@ void Chip8::step()
         uint8_t value = instruction[1] << 4 | instruction[0];
         printf("Set register %X to %X\n", instruction[2], value);
         Registers[instruction[2]] = value;
-        PC+=2;
         break;
     }
 
@@ -145,14 +133,111 @@ void Chip8::step()
         uint8_t value = instruction[1] << 4 | instruction[0];
         printf("Set register %X = register %X + %X\n", instruction[2], instruction[2], value);
         Registers[instruction[2]]+=value;
-        PC+=2;
         break;
     }
 
     case 0x8:
     {
-        printf("register operations, todo\n");
+        switch(instruction[3])
+        {
+          case 0x0:
+          {
+            Registers[instruction[2]] = instruction[1];
+            break;
+          }
+          case 0x1:
+          {
+            Registers[instruction[2]] = Registers[instruction[2]] | Registers[instruction[1]];
+            break;
+          }
+          case 0x2:
+          {
+            Registers[instruction[2]] = Registers[instruction[2]] & Registers[instruction[1]];
+            break;
+          }
+          case 0x3:
+          {
+            Registers[instruction[2]] = Registers[instruction[2]] ^ Registers[instruction[1]];
+            break;
+          }
+          case 0x4:
+          {
+            uint16_t result = Registers[instruction[2]] + Registers[instruction[1]];
+            if(result > 255)
+            {
+              Registers[instruction[2]] = result%255;
+              Registers[15] = 1;
+            }
+            else
+            {
+              Registers[instruction[2]] = result;
+              Registers[15] = 0;
+            }
+            break;
+          }
+          case 0x5:
+          {
+            if(Registers[instruction[2]] > Registers[instruction[1]])
+            {
+              Registers[15] = 1;
+            }
+            else
+            {
+              Registers[15] = 0;
+            }
+            Registers[instruction[2]] = Registers[instruction[2]] - Registers[instruction[1]];
+            break;
+          }
+          case 0x6:
+          {
+            if(Registers[instruction[2]] & 0x1 == 1)
+            {
+              Registers[15] = 1;
+            }
+            else
+            {
+              Registers[15] = 0;
+            }
+            Registers[instruction[2]] = Registers[instruction[2]] >> 1;
+            break;
+          }
+          case 0x7:
+          {
+            if(Registers[instruction[1]] > Registers[instruction[2]])
+            {
+              Registers[15] = 1;
+            }
+            else
+            {
+              Registers[15] = 0;
+            }
+            Registers[instruction[2]] = Registers[instruction[1]] - Registers[instruction[2]];
+            break;
+          }
+          case 0xE:
+          {
+            if((Registers[instruction[2]] & 0x1000000 >> 7) == 1)
+            {
+              Registers[15] = 1;
+            }
+            else
+            {
+              Registers[15] = 0;
+            }
+            Registers[instruction[2]] = Registers[instruction[2]] << 1;
+            break;
+          }
+        }
+        printf("register operations\n");
         break;
+    }
+
+    case 0x9:
+    {
+      if(Registers[instruction[2]] != Registers[instruction[1]])
+      {
+        PC+=2;
+      }
     }
 
     default:
