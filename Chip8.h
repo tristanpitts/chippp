@@ -40,6 +40,7 @@ public:
   ~Chip8();
   int init(std::string filePath);
   void step();
+  bool screen[64][32] = {0};
 };
 
 //64x32 screen

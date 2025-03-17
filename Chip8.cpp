@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <fstream>
 #include <cstring>
+#include <stdlib.h>
 
 Chip8::Chip8()
 {
@@ -59,6 +60,7 @@ void Chip8::step()
             case 0xE0:
             {
                 std::cout<<"Clear Screen"<<std::endl;
+                memset(screen, 0, sizeof(screen));
                 break;
             }
             case 0xEE:
@@ -238,6 +240,34 @@ void Chip8::step()
       {
         PC+=2;
       }
+    }
+
+    case 0xA:
+    {
+        I = instruction[2] << 8 | instruction[1] << 4 | instruction[0];
+        PC+=2;1
+    }
+
+    case 0xB:
+    {
+        PC = instruction[2] << 8 | instruction[1] << 4 | instruction[0];
+        PC+=Registers[0];
+    }
+
+    case 0xC:
+    {
+        Register[instruction[2]] = rand%255 & instruction[1] << 4 | instruction[0];
+        PC+=2;
+    }
+
+    case 0xD:
+    {
+        //What dimensions is a sprite?
+    }
+
+    case 0xE:
+    {
+        
     }
 
     default:
